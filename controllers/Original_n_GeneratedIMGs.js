@@ -25,6 +25,12 @@ async function test(req, res) {
       },
     };
 
+    const quantity = req.body.qty;
+    const nameStr = req.body.names;
+    const nameArray = nameStr.split(",");
+    console.log(nameArray);
+
+    // REMEMBER TO CHECK FOR same filename/ ELSE it will overwrite !! ( Need to code)
     // create new item in database
     const newUpload = new Original_n_GeneratedIMGs({
       title: req.body.title,
