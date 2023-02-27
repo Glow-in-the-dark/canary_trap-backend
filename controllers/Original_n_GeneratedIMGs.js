@@ -1,10 +1,11 @@
 require("dotenv").config();
 const fs = require("fs"); // import filesystem module
+const Jimp = require("jimp");
 
 const Original_n_GeneratedIMGs = require("../models/Original_n_GeneratedIMGs");
 
 async function test(req, res) {
-  console.log("hey now");
+  console.log("RUN TEST");
   console.log(req.body.title);
   console.log(req.body.qty);
   console.log(req.body.names);
@@ -12,23 +13,34 @@ async function test(req, res) {
   console.log(typeof req.file);
   console.log(req.file);
   // console.log(req.img);
+  // (async function () {
+  //   const image = await Jimp.read(req.file);
+  //   console.log("file Width and height");
+  //   console.log(image.bitmap.width);
+  //   console.log(image.bitmap.height);
+  // });
+
+  Jimp.read(req.file).then((image) => {
+    return image.bitmap.width;
+  });
 
   try {
-    // Store incoming Original Data {object} first as a variable
+    const quantity = req.body.qty;
+    const nameStr = req.body.names;
+    const nameArray = nameStr.split(",");
+    console.log(nameArray);
+
+    // Store incoming Original Data in an {obj} first as a variable, before setting this {obj} and saving it in database
     const incomingUpload = {
       title: req.body.title,
-      qty: req.body.qty,
-      names: req.body.names,
+      qty: quantity,
+      namesArray: nameArray,
+      description: req.body.description,
       originalImg: {
         data: fs.readFileSync("uploads_folder/" + req.file.filename),
         contentType: "image/jpg",
       },
     };
-
-    const quantity = req.body.qty;
-    const nameStr = req.body.names;
-    const nameArray = nameStr.split(",");
-    console.log(nameArray);
 
     // REMEMBER TO CHECK FOR same filename/ ELSE it will overwrite !! ( Need to code)
     // create new item in database

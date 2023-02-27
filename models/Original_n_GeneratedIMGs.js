@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const OriginalImageSchema = new mongoose.Schema({
   title: { type: String, required: true },
   qty: { type: Number, required: true },
-  names: { type: String, required: true },
+  namesArray: [{ type: String, required: true }],
+  description: { type: String },
   originalImg: {
     data: Buffer,
     contentType: String,
