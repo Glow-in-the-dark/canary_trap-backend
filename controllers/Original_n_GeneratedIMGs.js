@@ -12,23 +12,17 @@ async function test(req, res) {
   console.log(req.file.originalname);
   console.log(typeof req.file);
   console.log(req.file);
-  // console.log(req.img);
-  // (async function () {
-  //   const image = await Jimp.read(req.file);
-  //   console.log("file Width and height");
-  //   console.log(image.bitmap.width);
-  //   console.log(image.bitmap.height);
-  // });
-
-  // Jimp.read(req.file.path).then((image) => {
-  //   return image.bitmap.width;
-  // });
 
   try {
     const quantity = req.body.qty;
     const nameStr = req.body.names;
     const nameArray = nameStr.split(",");
     console.log(nameArray);
+
+    // Jimp.read(req.file.path).then((image) => {
+    //   console.log("img_width");
+    //   console.log(image.bitmap.width);
+    // });
 
     // Store incoming Original Data in an {obj} first as a variable, before setting this {obj} and saving it in database
     const incomingUpload = {

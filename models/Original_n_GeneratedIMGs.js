@@ -9,6 +9,7 @@ const OriginalImageSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
   },
+  originalPixelArray: [{ type: Number }],
 });
 
 const GeneratedSchema = new mongoose.Schema({
@@ -17,10 +18,12 @@ const GeneratedSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
   },
+  newImgArray: [{ type: Number }],
   imgDelta: {
     data: Buffer,
     contentType: String,
   },
+  imgDeltaArray: [{ type: Number }],
 });
 
 const imageSchema = new mongoose.Schema(

@@ -12,10 +12,10 @@ Jimp.read("Azuki.png", (err, image) => {
   const IMG_height = image_OG.bitmap.height;
 
   // Instantiate Original Img array
-  img_red = [];
-  img_green = [];
-  img_blue = [];
-  img_alpha = [];
+  let img_red = [];
+  let img_green = [];
+  let img_blue = [];
+  let img_alpha = [];
 
   //   image.quality(60).greyscale().write("greyscaled.jpg");
 
@@ -51,10 +51,18 @@ Jimp.read("Azuki.png", (err, image) => {
   // --------- ALTERED IMAGE PARTS -----------
 
   const totalPixel = IMG_width * IMG_height;
-  const percentageAltered = 0.4;
+  const percentageAltered = 0.8;
+  // const percentageAltered = 2;
   const alteredPixels = Math.floor(totalPixel * percentageAltered);
 
+  // This FOR loop, loops throught the randomly selected pixels to alter it
   for (let i = 0; i <= alteredPixels; i++) {
+    // // test if it really alters:
+    // // try on first pixel.
+    // const newColor = Jimp.rgbaToInt(255, 255, 255, 0);
+    // image_altered.setPixelColor(newColor, 0, 0);
+    // // test end...
+
     const rand_width = Math.floor(Math.random() * IMG_width + 1);
     const rand_height = Math.floor(Math.random() * IMG_height + 1);
 
@@ -155,6 +163,7 @@ Jimp.read("Azuki.png", (err, image) => {
         if (rd < 0.5) {
           pixel_RGBA.a = alpha - 1;
           //   console.log(pixel_RGBA);
+          //   console.log("alter alpha");
           const new_Hex_color = Jimp.rgbaToInt(
             pixel_RGBA.r,
             pixel_RGBA.g,
@@ -165,6 +174,7 @@ Jimp.read("Azuki.png", (err, image) => {
         } else {
           pixel_RGBA.a = alpha + 1;
           //   console.log(pixel_RGBA);
+          //   console.log("alter alpha");
           const new_Hex_color = Jimp.rgbaToInt(
             pixel_RGBA.r,
             pixel_RGBA.g,
@@ -177,13 +187,14 @@ Jimp.read("Azuki.png", (err, image) => {
     }
   }
 
+  // OUTPUT the alted image file.
   image_altered.write("MODDED.png");
 
   // Instantiate altered Img array
-  alt_img_red = [];
-  alt_img_green = [];
-  alt_img_blue = [];
-  alt_img_alpha = [];
+  let alt_img_red = [];
+  let alt_img_green = [];
+  let alt_img_blue = [];
+  let alt_img_alpha = [];
 
   image_altered.scan(
     start_X_coor,
@@ -202,81 +213,96 @@ Jimp.read("Azuki.png", (err, image) => {
       alt_img_alpha.push(alpha);
     }
   );
-  //--------------
-  //   // set a 20% chance it will apply a filter
-  //   let r = Math.random();
-  //   if (r < 0.2) {
-  //     // 100% of the time of the 20% it will apply a small +/- red filter
-  //     if (red > 0 && red < 255) {
-  //       let rd = Math.random();
-  //       if (rd < 0.5) {
-  //         this.bitmap.data[idx + 0] = red - 1;
-  //         alt_img_red.push(this.bitmap.data[idx + 0]);
-  //       } else {
-  //         this.bitmap.data[idx + 0] = red + 1;
-  //         alt_img_red.push(this.bitmap.data[idx + 0]);
-  //       }
-  //     }
-  //     // if is < 0.15, which is 75% of the 20%, it will apply both red and green filter.
-  //     if (r < 0.15) {
-  //       if (green > 0 && green < 255) {
-  //         let rd = Math.random();
-  //         if (rd < 0.5) {
-  //           this.bitmap.data[idx + 1] = green - 1;
-  //           alt_img_green.push(this.bitmap.data[idx + 1]);
-  //         } else {
-  //           this.bitmap.data[idx + 1] = green + 1;
-  //           alt_img_green.push(this.bitmap.data[idx + 1]);
-  //         }
-  //       }
-  //     }
-  //     // less than 0.10, apply red, green & blue filter
-  //     if (r < 0.1) {
-  //       if (blue > 0 && blue < 255) {
-  //         let rd = Math.random();
-  //         if (rd < 0.5) {
-  //           this.bitmap.data[idx + 2] = blue - 1;
-  //           alt_img_blue.push(this.bitmap.data[idx + 2]);
-  //         } else {
-  //           this.bitmap.data[idx + 2] = blue + 1;
-  //           alt_img_blue.push(this.bitmap.data[idx + 2]);
-  //         }
-  //       }
-  //     }
-  //     if (r < 0.05) {
-  //       if (alpha > 0 && alpha < 255) {
-  //         let rd = Math.random();
-  //         if (rd < 0.5) {
-  //           this.bitmap.data[idx + 3] = alpha - 1;
-  //           alt_img_alpha.push(this.bitmap.data[idx + 3]);
-  //         } else {
-  //           this.bitmap.data[idx + 3] = alpha + 1;
-  //           alt_img_alpha.push(this.bitmap.data[idx + 3]);
-  //         }
-  //       }
-  //     }
-  //   } else {
-  //     alt_img_red.push(red);
-  //     alt_img_green.push(green);
-  //     alt_img_blue.push(blue);
-  //     alt_img_alpha.push(alpha);
-  //   }
-  // });
+  // // -----------------------THIS PART BELOW IS ONLY FOR CHECKING --------------------------------------
+  // // original img data:
+  // console.log("original data----------------");
+  // console.log(img_red);
+  // console.log(img_green);
+  // console.log(img_blue);
+  // console.log(img_alpha);
+  // console.log(img_red.length);
 
-  //   // original img data:
-  //   console.log(img_red);
-  //   console.log(img_green);
-  //   console.log(img_blue);
-  //   console.log(img_alpha);
-  //   console.log(img_red.length);
+  // //   // alt img data:
+  // console.log("altered data-------------------");
+  // console.log(alt_img_red);
+  // console.log(alt_img_green);
+  // console.log(alt_img_blue);
+  // console.log(alt_img_alpha);
+  // console.log(alt_img_red.length);
 
-  //   // alt img data:
-  //   console.log(alt_img_red);
-  //   console.log(alt_img_green);
-  //   console.log(alt_img_blue);
-  //   console.log(alt_img_alpha);
-  //   console.log(alt_img_red.length);
+  // console.log(image_OG.pHash());
+  // console.log(image_altered.pHash());
 
-  console.log(image_OG.pHash());
-  console.log(image_altered.pHash());
+  function arrayEquals(a, b) {
+    return (
+      Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((val, index) => val === b[index])
+    );
+  }
+
+  // CHECK to make sure altered layer is different from Originals.
+  console.log("checks every layer of altered vs Original");
+  console.log("checks on red layer");
+  console.log(arrayEquals(alt_img_red, img_red));
+  console.log("checks on green layer");
+  console.log(arrayEquals(alt_img_green, img_green));
+  console.log("checks on blue layer");
+  console.log(arrayEquals(alt_img_blue, img_blue));
+  console.log("checks on alpha layer");
+  console.log(arrayEquals(alt_img_alpha, img_alpha));
+
+  // CHECK TO MAKE SURE MODDED IMGs equates.
+  console.log(
+    "checks if the altered images array, matched with the MODDED image output."
+  );
+
+  // CHECKING THE UPLOADED ALTERED IMAGE...
+  Jimp.read("MODDED.png", (err, alt_image) => {
+    // if (err) throw err;
+
+    // Instantiate altered Img array
+    let mod_img_red = [];
+    let mod_img_green = [];
+    let mod_img_blue = [];
+    let mod_img_alpha = [];
+
+    alt_image.scan(
+      start_X_coor,
+      start_Y_coor,
+      IMG_width,
+      IMG_height,
+      function (x, y, idx) {
+        let red = this.bitmap.data[idx + 0];
+        let green = this.bitmap.data[idx + 1];
+        let blue = this.bitmap.data[idx + 2];
+        let alpha = this.bitmap.data[idx + 3];
+
+        mod_img_red.push(red);
+        mod_img_green.push(green);
+        mod_img_blue.push(blue);
+        mod_img_alpha.push(alpha);
+      }
+    );
+
+    // console.log("checks on red layer");
+    // console.log(arrayEquals(alt_img_red, mod_img_red));
+    // console.log("checks on green layer");
+    // console.log(arrayEquals(alt_img_green, mod_img_green));
+    // console.log("checks on blue layer");
+    // console.log(arrayEquals(alt_img_blue, mod_img_blue));
+    // console.log("checks on alpha layer");
+    // console.log(arrayEquals(alt_img_alpha, mod_img_alpha));
+
+    // console.log("checks every layer of MODDED vs Original");
+    // console.log("checks on red layer");
+    // console.log(arrayEquals(mod_img_red, img_red));
+    // console.log("checks on green layer");
+    // console.log(arrayEquals(mod_img_green, img_green));
+    // console.log("checks on blue layer");
+    // console.log(arrayEquals(mod_img_blue, img_blue));
+    // console.log("checks on alpha layer");
+    // console.log(arrayEquals(mod_img_alpha, img_alpha));
+  });
 });
