@@ -9,21 +9,19 @@ const OriginalImageSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
   },
-  originalPixelArray: [{ type: Number }],
+  redArray: [{ type: Number }],
+  greenArray: [{ type: Number }],
+  blueArray: [{ type: Number }],
+  alphaArray: [{ type: Number }],
 });
 
 const GeneratedSchema = new mongoose.Schema({
   titleName: { type: String },
-  newImg: {
-    data: Buffer,
-    contentType: String,
-  },
-  newImgArray: [{ type: Number }],
-  imgDelta: {
-    data: Buffer,
-    contentType: String,
-  },
-  imgDeltaArray: [{ type: Number }],
+  receipientName: { type: String },
+  newRedArray: [{ type: Number }],
+  newGreenArray: [{ type: Number }],
+  newBlueArray: [{ type: Number }],
+  newAlphaArray: [{ type: Number }],
 });
 
 const imageSchema = new mongoose.Schema(
