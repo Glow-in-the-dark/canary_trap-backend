@@ -20,9 +20,9 @@ async function test(req, res) {
   //   console.log(image.bitmap.height);
   // });
 
-  Jimp.read(req.file).then((image) => {
-    return image.bitmap.width;
-  });
+  // Jimp.read(req.file.path).then((image) => {
+  //   return image.bitmap.width;
+  // });
 
   try {
     const quantity = req.body.qty;
