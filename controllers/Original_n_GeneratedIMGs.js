@@ -4,8 +4,8 @@ const Jimp = require("jimp");
 
 const Original_n_GeneratedIMGs = require("../models/Original_n_GeneratedIMGs");
 
-async function test(req, res) {
-  console.log("RUN TEST");
+async function create(req, res) {
+  console.log("RUN CREATE TEST");
   console.log(req.file);
 
   try {
@@ -53,13 +53,14 @@ async function test(req, res) {
         const alpha = this.bitmap.data[idx + 3];
 
         img_red.push(red);
-        img_green.push(green);
-        img_blue.push(blue);
-        img_alpha.push(alpha);
+        // img_green.push(green);
+        // img_blue.push(blue);
+        // img_alpha.push(alpha);
       }
     );
     // //works now
-    // console.log(img_red);
+    console.log("logging original red array");
+    console.log(img_red);
     // console.log(img_green);
     // console.log(img_blue);
     // console.log(img_alpha);
@@ -77,7 +78,7 @@ async function test(req, res) {
         data: fs.readFileSync("uploads_folder/" + req.file.filename),
         contentType: imgFiletype,
       },
-      // redArray: img_red,
+      redArray: img_red,
       // greenArray: img_green,
       // blueArray: img_blue,
       // alphaArray: img_alpha,
@@ -94,7 +95,11 @@ async function test(req, res) {
 
     //  ------ ORIGINAL IMAGE - UPLOAD to database (end) ----------------------
 
-    // --------   Generate Multiple - Altered IMAGE    ------------------------------
+    //////////////  TEST LOGGING (PIXELS) /////////////
+    // console.log("---console.log ORIGINAL img_red---");
+    // console.log(img_red);
+
+    // --------   Generate Multiple + Altered IMAGE + push to Database   ------------------------------
     const totalPixel = IMG_width * IMG_height;
     const percentageAltered = 0.8;
     // const percentageAltered = 2;
@@ -275,15 +280,9 @@ async function test(req, res) {
           strippedFileName +
           "_" +
           nameArray[i] +
-          "MODDED." +
+          "." +
           strippedFileType
       );
-      // change it into 'buffer' format
-      const altered_img_buffer = await image_altered.getBufferAsync(
-        imgFiletype
-      );
-
-      console.log(altered_img_buffer);
 
       // Instantiate altered Img array
       let alt_img_red = [];
@@ -309,6 +308,14 @@ async function test(req, res) {
         }
       );
 
+      // change it into 'buffer' format
+      const altered_img_buffer = await image_altered.getBufferAsync(
+        imgFiletype
+      );
+      console.log("---- redArray of altered img(" + nameArray[i] + ") -----");
+      console.log(altered_img_buffer);
+      console.log(alt_img_red);
+
       const eachAlteredImg = {
         titleName: req.body.title,
         receipientName: nameArray[i],
@@ -316,7 +323,7 @@ async function test(req, res) {
           data: altered_img_buffer,
           contentType: imgFiletype,
         },
-        // newRedArray: alt_img_red,
+        newRedArray: alt_img_red,
         // newGreenArray: alt_img_green,
         // newBlueArray: alt_img_blue,
         // newAlphaArray: alt_img_alpha,
@@ -326,36 +333,6 @@ async function test(req, res) {
     }
     // --------   Generate Multiple - Altered IMAGE  (end)   ------------------------------
 
-    // // Uploading to database, with the huge array dataset, But sizew too big, it jammes up mongo.
-    // // From the "body" of request data, Store incoming Original Data in an {obj} first as a variable, before setting this {obj} and saving it in database
-    // const incomingUpload = {
-    //   title: req.body.title,
-    //   qty: distribution_Qty,
-    //   namesArray: nameArray,
-    //   description: req.body.description,
-    //   originalImg: {
-    //     data: fs.readFileSync("uploads_folder/" + req.file.filename),
-    //     contentType: "image/jpg",
-    //   },
-    //   // redArray: img_red,
-    //   // greenArray: img_green,
-    //   // blueArray: img_blue,
-    //   // alphaArray: img_alpha,
-    // };
-
-    // // REMEMBER TO CHECK FOR same filename/ ELSE it will overwrite !! ( Need to code)
-    // // create new item in database
-    // const newUpload = new Original_n_GeneratedIMGs({
-    //   title: req.body.title,
-    //   imgFiletype: imgFiletype,
-    // });
-
-    // //push new incoming Upload into the "orig_img" array
-    // newUpload.orig_img.push(incomingUpload);
-
-    //push new incoming Upload into the "generated_imgs" array
-    // newUpload.generated_imgs.push(<>)
-
     // save
     const savedUpload = await newUpload.save();
     console.log("Original Upload Image saved");
@@ -364,7 +341,89 @@ async function test(req, res) {
       createdEvent: savedUpload,
     });
   } catch (error) {
-    console.log("POST /uploadImg/test", error);
+    console.log("POST /uploadImg/create", error);
+    res.status(400).json({ status: "error", message: error.message });
+  }
+}
+
+async function expose(req, res) {
+  console.log(req.file);
+  console.log(req.file.path);
+  const imgFiletype = req.file.mimetype;
+
+  // function to check Arrays's equality
+  function arrayEquals(a, b) {
+    return (
+      Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((val, index) => val === b[index])
+    );
+  }
+
+  try {
+    const susImage = await Jimp.read(req.file.path);
+    const susImage_buffer = await susImage.getBufferAsync(imgFiletype);
+    console.log(susImage_buffer);
+
+    // Instantiate sus Img array
+    let sus_img_red = [];
+    let sus_img_green = [];
+    let sus_img_blue = [];
+    let sus_img_alpha = [];
+
+    const start_X_coor = 0;
+    const start_Y_coor = 0;
+    const IMG_width = susImage.bitmap.width;
+    const IMG_height = susImage.bitmap.height;
+
+    susImage.scan(
+      start_X_coor,
+      start_Y_coor,
+      IMG_width,
+      IMG_height,
+      function (x, y, idx) {
+        let red = this.bitmap.data[idx + 0];
+        let green = this.bitmap.data[idx + 1];
+        let blue = this.bitmap.data[idx + 2];
+        let alpha = this.bitmap.data[idx + 3];
+
+        sus_img_red.push(red);
+        // sus_img_green.push(green);
+        // sus_img_blue.push(blue);
+        // sus_img_alpha.push(alpha);
+      }
+    );
+
+    console.log("logging sus_red_px_Array", sus_img_red);
+
+    //find in database
+    const data = await Original_n_GeneratedIMGs.find({ title: "TITLE" });
+    // find #no. of times to loop through
+    const numGeneratedImgs = data[0].generated_imgs.length;
+    console.log(data);
+    console.log(numGeneratedImgs);
+
+    for (let i = 0; i < numGeneratedImgs; i++) {
+      if (arrayEquals(sus_img_red, data[0].generated_imgs[i].newRedArray)) {
+        console.log(data[0].generated_imgs[i].receipientName);
+        break;
+      } else {
+        console.log(
+          "Image not found... still finding. Currently at array location " +
+            i.toString()
+        );
+      }
+      // if (susImage_buffer == data[0].generated_imgs[i].alteredImgBuffer.data) {
+      //   console.log(data[0].generated_imgs[i].receipientName);
+      // } else {
+      //   console.log(" Image not found");
+      //   // console.log(susImage_buffer);
+      //   console.log(data[0].generated_imgs[i].receipientName);
+      // }
+    }
+  } catch (error) {
+    console.log("POST /uploadImg/expose", error);
     res.status(400).json({ status: "error", message: error.message });
   }
 }
@@ -405,6 +464,6 @@ async function uploadImageAndGenerate(req, res) {
 }
 
 module.exports = {
-  test,
-  //   uploadImageAndGenerate,
+  create, //   uploadImage And Generate altered Imgs,
+  expose,
 };
