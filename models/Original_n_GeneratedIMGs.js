@@ -18,6 +18,10 @@ const OriginalImageSchema = new mongoose.Schema({
 const GeneratedSchema = new mongoose.Schema({
   titleName: { type: String },
   receipientName: { type: String },
+  alteredImg: {
+    data: Buffer,
+    contentType: String,
+  },
   newRedArray: [{ type: Number }],
   newGreenArray: [{ type: Number }],
   newBlueArray: [{ type: Number }],
@@ -28,6 +32,7 @@ const imageSchema = new mongoose.Schema(
   {
     //account_ID: { type: String, required: true },
     title: { type: String, required: true },
+    imgFiletype: { type: String },
     orig_img: [OriginalImageSchema],
     generated_imgs: [GeneratedSchema],
   },
