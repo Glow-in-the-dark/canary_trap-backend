@@ -18,7 +18,7 @@ const OriginalImageSchema = new mongoose.Schema({
 const GeneratedSchema = new mongoose.Schema({
   titleName: { type: String },
   receipientName: { type: String },
-  alteredImg: {
+  alteredImgBuffer: {
     data: Buffer,
     contentType: String,
   },
