@@ -36,9 +36,9 @@ async function create(req, res) {
 
     // Instantiate Original Img array
     let img_red = [];
-    let img_green = [];
-    let img_blue = [];
-    let img_alpha = [];
+    // let img_green = [];
+    // let img_blue = [];
+    // let img_alpha = [];
 
     image_OG.scan(
       start_X_coor,
@@ -48,9 +48,9 @@ async function create(req, res) {
       function (x, y, idx) {
         // Get the colors
         const red = this.bitmap.data[idx + 0];
-        const green = this.bitmap.data[idx + 1];
-        const blue = this.bitmap.data[idx + 2];
-        const alpha = this.bitmap.data[idx + 3];
+        // const green = this.bitmap.data[idx + 1];
+        // const blue = this.bitmap.data[idx + 2];
+        // const alpha = this.bitmap.data[idx + 3];
 
         img_red.push(red);
         // img_green.push(green);
@@ -94,10 +94,6 @@ async function create(req, res) {
     newUpload.orig_img.push(incomingUpload);
 
     //  ------ ORIGINAL IMAGE - UPLOAD to database (end) ----------------------
-
-    //////////////  TEST LOGGING (PIXELS) /////////////
-    // console.log("---console.log ORIGINAL img_red---");
-    // console.log(img_red);
 
     // --------   Generate Multiple + Altered IMAGE + push to Database   ------------------------------
     const totalPixel = IMG_width * IMG_height;
@@ -286,9 +282,9 @@ async function create(req, res) {
 
       // Instantiate altered Img array
       let alt_img_red = [];
-      let alt_img_green = [];
-      let alt_img_blue = [];
-      let alt_img_alpha = [];
+      // let alt_img_green = [];
+      // let alt_img_blue = [];
+      // let alt_img_alpha = [];
 
       image_altered.scan(
         start_X_coor,
@@ -297,14 +293,14 @@ async function create(req, res) {
         IMG_height,
         function (x, y, idx) {
           let red = this.bitmap.data[idx + 0];
-          let green = this.bitmap.data[idx + 1];
-          let blue = this.bitmap.data[idx + 2];
-          let alpha = this.bitmap.data[idx + 3];
+          // let green = this.bitmap.data[idx + 1];
+          // let blue = this.bitmap.data[idx + 2];
+          // let alpha = this.bitmap.data[idx + 3];
 
           alt_img_red.push(red);
-          alt_img_green.push(green);
-          alt_img_blue.push(blue);
-          alt_img_alpha.push(alpha);
+          // alt_img_green.push(green);
+          // alt_img_blue.push(blue);
+          // alt_img_alpha.push(alpha);
         }
       );
 
@@ -389,20 +385,19 @@ async function expose(req, res) {
         let alpha = this.bitmap.data[idx + 3];
 
         sus_img_red.push(red);
-        // sus_img_green.push(green);
-        // sus_img_blue.push(blue);
-        // sus_img_alpha.push(alpha);
+        sus_img_green.push(green);
+        sus_img_blue.push(blue);
+        sus_img_alpha.push(alpha);
       }
     );
 
-    console.log("logging sus_red_px_Array", sus_img_red);
-
     //find in database
-    const data = await Original_n_GeneratedIMGs.find({ title: "TITLE" });
+    const data = await Original_n_GeneratedIMGs.find({ title: "TITLE2" });
+    console.log("===check multiple titles===");
+    console.log(data); // if got more than 2 data return, loop through the array too
+
     // find #no. of times to loop through
     const numGeneratedImgs = data[0].generated_imgs.length;
-    console.log(data);
-    console.log(numGeneratedImgs);
 
     for (let i = 0; i < numGeneratedImgs; i++) {
       if (arrayEquals(sus_img_red, data[0].generated_imgs[i].newRedArray)) {
