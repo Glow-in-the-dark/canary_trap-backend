@@ -4,7 +4,7 @@ const OriginalImageSchema = new mongoose.Schema({
   title: { type: String, required: true },
   qty: { type: Number, required: true },
   namesArray: [{ type: String, required: true }],
-  description: { type: String },
+  // description: { type: String },
   originalImg: {
     data: Buffer,
     contentType: String,
@@ -33,6 +33,7 @@ const imageSchema = new mongoose.Schema(
     //account_ID: { type: String, required: true },
     title: { type: String, required: true },
     imgFiletype: { type: String },
+    description: { type: String },
     orig_img: [OriginalImageSchema],
     generated_imgs: [GeneratedSchema],
   },

@@ -5,7 +5,7 @@ const Jimp = require("jimp");
 const Original_n_GeneratedIMGs = require("../models/Original_n_GeneratedIMGs");
 
 async function create(req, res) {
-  console.log("RUN CREATE TEST");
+  console.log("RUN Create_Expose");
   console.log(req.file);
 
   try {
@@ -73,7 +73,7 @@ async function create(req, res) {
       title: req.body.title,
       qty: distribution_Qty,
       namesArray: nameArray,
-      description: req.body.description,
+      // description: req.body.description,
       originalImg: {
         data: fs.readFileSync("uploads_folder/" + req.file.filename),
         contentType: imgFiletype,
@@ -89,6 +89,7 @@ async function create(req, res) {
     const newUpload = new Original_n_GeneratedIMGs({
       title: req.body.title,
       imgFiletype: imgFiletype,
+      description: req.body.description,
     });
     //push new incoming Upload into the "orig_img" array in the DATABASE
     newUpload.orig_img.push(incomingUpload);
