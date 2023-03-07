@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const controllers = require("../controllers/Original_n_GeneratedIMGs");
-// const auth = require("../middleware/auth");
+const auth = require("../middleware/auth");
 
 /////////////////////////////////////////////////////////////////////////
 // Handling Image Events
@@ -41,9 +41,14 @@ const upload2 = multer({ storage: leakStorage });
 // ROUTES ARE HERE vvvvvvvvvvv
 
 // CREATE endpoint, STORE uploaded image is stored in Upload folder + database + generate altered images.
-router.post("/create", upload.single("originalImg"), controllers.create);
+router.post("/create", auth, upload.single("originalImg"), controllers.create);
 // UPLOAD suspected leaked images.
-router.post("/expose", upload2.single("susLeakedImg"), controllers.expose);
+router.post(
+  "/expose",
+  auth,
+  upload2.single("susLeakedImg"),
+  controllers.expose
+);
 
 // CREATE:
 // router.put("/uploadImg", controllers.uploadImageAndGenerate);

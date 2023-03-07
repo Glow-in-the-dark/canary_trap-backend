@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
+const User = require("./User");
 
 const OriginalImageSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -30,7 +32,7 @@ const GeneratedSchema = new mongoose.Schema({
 
 const imageSchema = new mongoose.Schema(
   {
-    //account_ID: { type: String, required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
     title: { type: String, required: true },
     imgFiletype: { type: String },
     description: { type: String },

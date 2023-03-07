@@ -10,6 +10,12 @@ async function create(req, res) {
 
   try {
     // storing Incoming uploaded request DATA into variables for easy access later on.
+
+    // Add USERID
+    const targetUserId = req.user && req.user._id;
+    if (!targetUserId) {
+      res.status(403).json({ status: "error", message: "Unauthorized Error" });
+    }
     const distribution_Qty = req.body.qty;
     const nameStr = req.body.names;
     const nameArray = nameStr.split(","); // Change it into an ARRAY of Names.
@@ -36,9 +42,6 @@ async function create(req, res) {
 
     // Instantiate Original Img array
     let img_red = [];
-    // let img_green = [];
-    // let img_blue = [];
-    // let img_alpha = [];
 
     image_OG.scan(
       start_X_coor,
@@ -48,25 +51,16 @@ async function create(req, res) {
       function (x, y, idx) {
         // Get the colors
         const red = this.bitmap.data[idx + 0];
-        // const green = this.bitmap.data[idx + 1];
-        // const blue = this.bitmap.data[idx + 2];
-        // const alpha = this.bitmap.data[idx + 3];
 
         img_red.push(red);
-        // img_green.push(green);
-        // img_blue.push(blue);
-        // img_alpha.push(alpha);
       }
     );
     // //works now
-    console.log("logging original red array");
-    console.log(img_red);
-    // console.log(img_green);
-    // console.log(img_blue);
-    // console.log(img_alpha);
+    console.log("logging original red array", img_red);
+
     // --------     ORIGINAL IMAGE (JIMP) (end)  ------------------------------
 
-    //  ------ ORIGINAL IMAGE - UPLOAD to database (start) ----------------------
+    //  ------ ORIGINAL IMAGE - UPLOAD to DATABASE (start) ----------------------
     // Uploading to database, with the huge array dataset, But sizew too big, it jammes up mongo.
     // From the "body" of request data, Store incoming Original Data in an {obj} first as a variable, before setting this {obj} and saving it in database
     const incomingUpload = {
@@ -79,14 +73,12 @@ async function create(req, res) {
         contentType: imgFiletype,
       },
       redArray: img_red,
-      // greenArray: img_green,
-      // blueArray: img_blue,
-      // alphaArray: img_alpha,
     };
 
     // REMEMBER TO CHECK FOR same filename/ ELSE it will overwrite !! ( Need to code)
     // create new item in database
     const newUpload = new Original_n_GeneratedIMGs({
+      createdBy: targetUserId,
       title: req.body.title,
       imgFiletype: imgFiletype,
       description: req.body.description,
@@ -94,7 +86,7 @@ async function create(req, res) {
     //push new incoming Upload into the "orig_img" array in the DATABASE
     newUpload.orig_img.push(incomingUpload);
 
-    //  ------ ORIGINAL IMAGE - UPLOAD to database (end) ----------------------
+    //  ------ ORIGINAL IMAGE - UPLOAD to DATABASE (end) ----------------------
 
     // --------   Generate Multiple + Altered IMAGE + push to Database   ------------------------------
     const totalPixel = IMG_width * IMG_height;
@@ -108,7 +100,7 @@ async function create(req, res) {
       for (let i = 0; i <= alteredPixels; i++) {
         // // test if it really alters:
         // // try on first pixel.
-        // const newColor = Jimp.rgbaToInt(255, 255, 255, 0);
+        // const newColor = Jimp.rgbaToInt(88, 255, 255, 0);
         // image_altered.setPixelColor(newColor, 0, 0);
         // // test end...
 
@@ -118,160 +110,59 @@ async function create(req, res) {
         // get individual pixel color from random pixel
         const hex_color = image_altered.getPixelColor(rand_width, rand_height);
         const pixel_RGBA = Jimp.intToRGBA(hex_color); // RGBA in this obj format => { r: 49, g: 62, b: 80, a: 255 }
-        // console.log(pixel_RGBA);
+        // console.log(" still OG random pixel's RGBA", pixel_RGBA);
 
-        const rand_color = Math.floor(Math.random() * 4 + 1);
-        if (rand_color == 1) {
-          const red = pixel_RGBA.r;
-          if (red > 0 && red < 255) {
-            let rd = Math.random();
-            if (rd < 0.5) {
-              pixel_RGBA.r = red - 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter red");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            } else {
-              pixel_RGBA.r = red + 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter red");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            }
-          }
-        } else if (rand_color == 2) {
-          const green = pixel_RGBA.g;
-          if (green > 0 && green < 255) {
-            let rd = Math.random();
-            if (rd < 0.5) {
-              pixel_RGBA.g = green - 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter green");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            } else {
-              pixel_RGBA.g = green + 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter green");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            }
-          }
-        } else if (rand_color == 3) {
-          const blue = pixel_RGBA.b;
-          if (blue > 0 && blue < 255) {
-            let rd = Math.random();
-            if (rd < 0.5) {
-              pixel_RGBA.b = blue - 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter blue");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            } else {
-              pixel_RGBA.b = blue + 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter blue");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            }
-          }
-        } else {
-          const alpha = pixel_RGBA.a;
-          if (alpha > 0 && alpha < 255) {
-            let rd = Math.random();
-            if (rd < 0.5) {
-              pixel_RGBA.a = alpha - 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter alpha");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            } else {
-              pixel_RGBA.a = alpha + 1;
-              //   console.log(pixel_RGBA);
-              //   console.log("alter alpha");
-              const new_Hex_color = Jimp.rgbaToInt(
-                pixel_RGBA.r,
-                pixel_RGBA.g,
-                pixel_RGBA.b,
-                pixel_RGBA.a
-              );
-              image_altered.setPixelColor(
-                new_Hex_color,
-                rand_width,
-                rand_height
-              );
-            }
+        // get the red "value" from selected random pixel.
+        const red = pixel_RGBA.r;
+        if (red > 0 && red < 255) {
+          let rd = Math.random();
+          if (rd < 0.5) {
+            pixel_RGBA.r = red - 1;
+            //   console.log(pixel_RGBA);
+            //   console.log("alter red");
+            const new_Hex_color = Jimp.rgbaToInt(
+              pixel_RGBA.r,
+              pixel_RGBA.g,
+              pixel_RGBA.b,
+              pixel_RGBA.a
+            );
+            // // logging new pixel RGBA Change
+            // const testNewPixelRGBA = {
+            //   r: pixel_RGBA.r,
+            //   g: pixel_RGBA.g,
+            //   b: pixel_RGBA.b,
+            //   a: pixel_RGBA.a,
+            // };
+            // console.log("new random pixel's RGBA r-1", pixel_RGBA);
+            image_altered.setPixelColor(new_Hex_color, rand_width, rand_height);
+          } else {
+            pixel_RGBA.r = red + 1;
+            //   console.log(pixel_RGBA);
+            //   console.log("alter red");
+            const new_Hex_color = Jimp.rgbaToInt(
+              pixel_RGBA.r,
+              pixel_RGBA.g,
+              pixel_RGBA.b,
+              pixel_RGBA.a
+            );
+            // // logging new pixel RGBA Change
+            // const testNewPixelRGBA = {
+            //   r: pixel_RGBA.r,
+            //   g: pixel_RGBA.g,
+            //   b: pixel_RGBA.b,
+            //   a: pixel_RGBA.a,
+            // };
+            // console.log("new random pixel's RGBA r+1", pixel_RGBA);
+            image_altered.setPixelColor(new_Hex_color, rand_width, rand_height);
           }
         }
       }
 
-      // OUTPUT the alted image file.
+      // OUTPUT the altered image file. ---------------
       const stripped = uploadedFilename.split(".");
       const strippedFileName = stripped[0];
       const strippedFileType = stripped[1];
+      // outputs the image for every loop of the current altered Image.
       image_altered.write(
         "uploads_folder/" +
           strippedFileName +
@@ -280,13 +171,12 @@ async function create(req, res) {
           "." +
           strippedFileType
       );
-
+      // // Taking the current Altered File and make it into a Array (red pixel)--------------
+      //
       // Instantiate altered Img array
       let alt_img_red = [];
-      // let alt_img_green = [];
-      // let alt_img_blue = [];
-      // let alt_img_alpha = [];
 
+      // populating the "alt_img_red = []" Array
       image_altered.scan(
         start_X_coor,
         start_Y_coor,
@@ -294,14 +184,8 @@ async function create(req, res) {
         IMG_height,
         function (x, y, idx) {
           let red = this.bitmap.data[idx + 0];
-          // let green = this.bitmap.data[idx + 1];
-          // let blue = this.bitmap.data[idx + 2];
-          // let alpha = this.bitmap.data[idx + 3];
 
           alt_img_red.push(red);
-          // alt_img_green.push(green);
-          // alt_img_blue.push(blue);
-          // alt_img_alpha.push(alpha);
         }
       );
 
@@ -333,14 +217,23 @@ async function create(req, res) {
     // save
     const savedUpload = await newUpload.save();
     console.log("Original Upload Image saved");
-    res.json({
+    return res.json({
       message: "Event created successfully",
       createdEvent: savedUpload,
     });
   } catch (error) {
     console.log("POST /uploadImg/create", error);
-    res.status(400).json({ status: "error", message: error.message });
+    return res.status(400).json({ status: "error", message: error.message });
   }
+}
+
+function checkDifference(arr1, arr2) {
+  error_index = [];
+  for (let index = 0; index < arr1.length; index++) {
+    if (arr1[index] != arr2[index]) error_index.push(index);
+  }
+  console.log("error_index.length : ", error_index.length);
+  console.log("error_index : ", error_index);
 }
 
 async function expose(req, res) {
@@ -350,11 +243,19 @@ async function expose(req, res) {
 
   // function to check Arrays's equality
   function arrayEquals(a, b) {
+    console.log("in in array equal...");
+    console.log("a.length === b.length: ", a.length === b.length);
+    console.log(
+      "a.every((val, index) => val === b[index]) : ",
+      a.every((val, index) => val == b[index])
+    );
+    console.log("returning....");
+    checkDifference(a, b);
     return (
       Array.isArray(a) &&
       Array.isArray(b) &&
       a.length === b.length &&
-      a.every((val, index) => val === b[index])
+      a.every((val, index) => val == b[index])
     );
   }
 
@@ -392,23 +293,30 @@ async function expose(req, res) {
       }
     );
 
+    console.log("req.body.projectId : ", req.body.projectId);
     //find in database
-    const data = await Original_n_GeneratedIMGs.find({ title: "TITLE2" });
+    const data = await Original_n_GeneratedIMGs.findById(req.body.projectId);
     console.log("===check multiple titles===");
     console.log(data); // if got more than 2 data return, loop through the array too
 
     // find #no. of times to loop through
-    const numGeneratedImgs = data[0].generated_imgs.length;
+    const numGeneratedImgs = data.generated_imgs.length;
 
     for (let i = 0; i < numGeneratedImgs; i++) {
-      if (arrayEquals(sus_img_red, data[0].generated_imgs[i].newRedArray)) {
-        console.log(data[0].generated_imgs[i].receipientName);
-        break;
+      console.log(sus_img_red.length);
+      console.log(data.generated_imgs[i].newRedArray.length);
+      if (arrayEquals(sus_img_red, data.generated_imgs[i].newRedArray)) {
+        console.log("EQUALS !!: ", data.generated_imgs[i].receipientName);
+
+        return res
+          .status(200)
+          .json({ name: data.generated_imgs[i].receipientName });
       } else {
         console.log(
           "Image not found... still finding. Currently at array location " +
             i.toString()
         );
+        // return res.status(200).json({ message: "YOU_ARE_EXPOSED" });
       }
       // if (susImage_buffer == data[0].generated_imgs[i].alteredImgBuffer.data) {
       //   console.log(data[0].generated_imgs[i].receipientName);
@@ -418,44 +326,10 @@ async function expose(req, res) {
       //   console.log(data[0].generated_imgs[i].receipientName);
       // }
     }
+    return res.status(200).json({ message: "YOU_ARE_EXPOSED" });
   } catch (error) {
     console.log("POST /uploadImg/expose", error);
     res.status(400).json({ status: "error", message: error.message });
-  }
-}
-
-async function uploadImageAndGenerate(req, res) {
-  try {
-    // Check if username is already in use
-    const user = await Users.findOne({ email: req.body.email });
-
-    if (user) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "duplicate email" });
-    }
-
-    // If no duplicate, create new account
-    const hash = await bcrypt.hash(req.body.password, 12);
-    const newUser = new Users({
-      name: req.body.name,
-      mobile_number: req.body.mobile_number,
-      email: req.body.email,
-      hash: hash,
-      gender: req.body.gender,
-      date_of_birth: req.body.date_of_birth,
-      organisation: req.body.organisation,
-      occupation: req.body.occupation,
-    });
-
-    await newUser.save();
-    console.log("created user is: ", newUser);
-    return res.json({ status: "okay", message: "user created" });
-  } catch (error) {
-    console.log("PUT /users/create", error);
-    return res
-      .status(400)
-      .json({ status: "error", message: "an error has occured" });
   }
 }
 

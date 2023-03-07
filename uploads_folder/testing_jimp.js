@@ -71,6 +71,7 @@ Jimp.read("Azuki.png", (err, image) => {
     const pixel_RGBA = Jimp.intToRGBA(hex_color); // RGBA in this obj format => { r: 49, g: 62, b: 80, a: 255 }
     // console.log(pixel_RGBA);
 
+    // this part chooses which R/G/B/A to alter.
     const rand_color = Math.floor(Math.random() * 4 + 1);
     if (rand_color == 1) {
       const red = pixel_RGBA.r;
