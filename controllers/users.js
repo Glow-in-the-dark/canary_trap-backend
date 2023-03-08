@@ -238,7 +238,7 @@ const deleteUserProj = async (req, res) => {
 
 ///// ---------  FUNCTION FOR ADMIN ONLY (ENDPOINTS) -------------------
 const adminGetAllProjects = async (req, res) => {
-  // This part check to make sure
+  // This if part check to make sure that it is admin before executing
   if (!req.user || (req.user && !req.user.isAdmin)) {
     return res.status(403).json({ message: "You are not Admin !" });
   }
@@ -273,16 +273,18 @@ const adminGetAllUsers = async (req, res) => {
   return res.json(allUsers);
 };
 
-//delete based on _id
+//delete based on Proj _id
 const adminDeleteProj = async (req, res) => {
   if (!req.user || (req.user && !req.user.isAdmin)) {
     return res.status(403).json({ message: "You are not Admin !" });
   }
   // codes
-  const deleteProjects = await Original_n_GeneratedIMGs.findOneAndDelete(
-    { _id: req.body._id },
-    {}
-  );
+  const { projectId } = req.params; // store the input OBJ, with the Key of name projectId
+  console.log("projectId : ", projectId);
+  const deletedProj = await Original_n_GeneratedIMGs.findOneAndDelete({
+    _id: projectId,
+  });
+
   res.send({ status: "ok", message: "deleted Proj as Admin" });
 };
 
@@ -292,7 +294,8 @@ const adminDeleteUser = async (req, res) => {
     return res.status(403).json({ message: "You are not Admin !" });
   }
   // codes
-  const deleteUser = await User.findOneAndDelete({ _id: req.body._id }, {});
+  const { userId } = req.params; // store the input OBJ, with the Key of name projectId
+  const deleteUser = await User.findOneAndDelete({ _id: userId }, {});
   return res.send({ status: "ok", message: "deleted User as Admin" });
 };
 
@@ -300,6 +303,7 @@ const adminDeleteUser = async (req, res) => {
 module.exports = {
   createNewUser,
   login,
+  // Protected user endpoints
   getRefreshToken,
   updateUserDetails,
   getUserProjs,

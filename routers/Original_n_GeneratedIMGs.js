@@ -50,7 +50,4 @@ router.post(
   controllers.expose
 );
 
-// CREATE:
-// router.put("/uploadImg", controllers.uploadImageAndGenerate);
-
 module.exports = router;
