@@ -1,7 +1,9 @@
 require("dotenv").config();
-const fs = require("fs"); // import filesystem module
-const Jimp = require("jimp");
+const fs = require("fs"); // import filesystem module.
+const Jimp = require("jimp"); // Image manipulation.
+const nodemailer = require("nodemailer"); // to send emails with image attachments.
 
+const User = require("../models/User.js");
 const Original_n_GeneratedIMGs = require("../models/Original_n_GeneratedIMGs");
 
 async function create(req, res) {
@@ -11,7 +13,7 @@ async function create(req, res) {
   try {
     // storing Incoming uploaded request DATA into variables for easy access later on.
 
-    // Add USERID
+    // Add USERID, and check for authentication
     const targetUserId = req.user && req.user._id;
     if (!targetUserId) {
       res.status(403).json({ status: "error", message: "Unauthorized Error" });
@@ -162,15 +164,13 @@ async function create(req, res) {
       const stripped = uploadedFilename.split(".");
       const strippedFileName = stripped[0];
       const strippedFileType = stripped[1];
+      const newAlteredImage_filename =
+        strippedFileName + "_" + nameArray[i] + "." + strippedFileType;
+      console.log(newAlteredImage_filename);
+
       // outputs the image for every loop of the current altered Image.
-      image_altered.write(
-        "uploads_folder/" +
-          strippedFileName +
-          "_" +
-          nameArray[i] +
-          "." +
-          strippedFileType
-      );
+      image_altered.write("uploads_folder/" + newAlteredImage_filename);
+
       // // Taking the current Altered File and make it into a Array (red pixel)--------------
       //
       // Instantiate altered Img array
@@ -209,8 +209,68 @@ async function create(req, res) {
         // newBlueArray: alt_img_blue,
         // newAlphaArray: alt_img_alpha,
       };
+
       //push new incoming Upload into the "generated_imgs" array
       newUpload.generated_imgs.push(eachAlteredImg);
+
+      // Find user (Proj creator's) EMAIL from User's Database(model):   ------ EMAILING PORTION ------
+      console.log(targetUserId);
+      const projCreatorEmail = await User.find({
+        _id: targetUserId,
+      });
+      const creatorEmail = projCreatorEmail[0].email;
+      console.log("will be sending email to:", creatorEmail);
+
+      const CLIENT_ID = process.env.CLIENT_ID;
+      const CLIENT_SECRET = process.env.CLIENT_SECRET;
+      const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+      // console.log("This is Client_ID:", CLIENT_ID);
+      // console.log("This is CLIENT_SECRET:", CLIENT_SECRET);
+      // console.log("This is ACCESS_TOKEN:", ACCESS_TOKEN);
+
+      async function sendEmail() {
+        try {
+          const transport = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              type: "OAuth2",
+              user: "Canary.Trapper888@gmail.com",
+              clientID: CLIENT_ID,
+              clientSecret: CLIENT_SECRET,
+              // accessToken, see here: "https://www.youtube.com/watch?v=vjv6vkAVNYU"
+              // accessToken only last 1 hour, need to update and put in new one.
+              accessToken: ACCESS_TOKEN,
+            },
+          });
+
+          const mailOptions = {
+            from: "Canary.Trapper888@gmail.com",
+            to: creatorEmail,
+            subject: "Images from Canary Trap: attachments",
+            text: "This is the body of the message",
+            html: `<h2> Thank you for Signing Up </h2> </br> Here are the attached images for ${nameArray[i]}`,
+            attachments: [
+              {
+                filename: newAlteredImage_filename,
+                path: "./uploads_folder/" + newAlteredImage_filename,
+              },
+            ],
+          };
+
+          const result = await transport.sendMail(mailOptions);
+          return result;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      sendEmail()
+        .then((result) => {
+          console.log("Email is sent" + result);
+        })
+        .catch((error) => {
+          console.log("Error is" + error.message);
+        });
     }
     // --------   Generate Multiple - Altered IMAGE  (end)   ------------------------------
 
