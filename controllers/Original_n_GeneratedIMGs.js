@@ -363,10 +363,12 @@ async function expose(req, res) {
     const numGeneratedImgs = data.generated_imgs.length;
 
     for (let i = 0; i < numGeneratedImgs; i++) {
-      console.log(sus_img_red.length);
-      console.log(data.generated_imgs[i].newRedArray.length);
+      // console.log(sus_img_red.length);
+      // console.log(data.generated_imgs[i].newRedArray.length);
       if (arrayEquals(sus_img_red, data.generated_imgs[i].newRedArray)) {
-        console.log("EQUALS !!: ", data.generated_imgs[i].receipientName);
+        // console.log("EQUALS !!: ", data.generated_imgs[i].receipientName);
+
+        // return data.generated_imgs[i].receipientName;
 
         return res
           .status(200)
@@ -386,7 +388,9 @@ async function expose(req, res) {
       //   console.log(data[0].generated_imgs[i].receipientName);
       // }
     }
-    return res.status(200).json({ message: "YOU_ARE_EXPOSED" });
+    return res
+      .status(200)
+      .json({ message: "No Matches Found: NO EXACT MATCH" });
   } catch (error) {
     console.log("POST /uploadImg/expose", error);
     res.status(400).json({ status: "error", message: error.message });
